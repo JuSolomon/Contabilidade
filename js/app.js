@@ -14,6 +14,82 @@
 
   const HISTORICO_KEY = "mei_app_historico_v1";
 
+  const LINKS_OFICIAIS = {
+    pgmei: "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/Identificacao",
+    dasnSimei: "https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/dasnsimei.app/Identificacao",
+  };
+
+  // --- Utilitários: copiar, .ics e impressão ---
+  async function copiarTexto(texto, botao) {
+    try {
+      await navigator.clipboard.writeText(texto);
+    } catch (e) {
+      window.prompt("Não foi possível copiar automaticamente. Copie o texto abaixo:", texto);
+      return;
+    }
+    if (botao) {
+      const original = botao.textContent;
+      botao.textContent = "Copiado!";
+      setTimeout(() => {
+        botao.textContent = original;
+      }, 1500);
+    }
+  }
+
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function dataParaICS(date) {
+    return String(date.getUTCFullYear()) + pad2(date.getUTCMonth() + 1) + pad2(date.getUTCDate());
+  }
+
+  function escaparICS(texto) {
+    return String(texto)
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\n/g, "\\n");
+  }
+
+  function baixarICS(nomeArquivo, { data, titulo, descricao }) {
+    const uid = "mei-calculadora-" + Date.now() + "@local";
+    const linhas = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//MEI Calculadora//PT-BR",
+      "BEGIN:VEVENT",
+      "UID:" + uid,
+      "DTSTAMP:" + dataParaICS(new Date()) + "T000000Z",
+      "DTSTART;VALUE=DATE:" + dataParaICS(data),
+      "SUMMARY:" + escaparICS(titulo),
+      "DESCRIPTION:" + escaparICS(descricao),
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ];
+    const blob = new Blob([linhas.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function imprimirElemento(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.classList.add("imprimir-isto");
+    window.addEventListener(
+      "afterprint",
+      () => el.classList.remove("imprimir-isto"),
+      { once: true }
+    );
+    window.print();
+  }
+
   function formatoMoeda(valor) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
@@ -154,6 +230,33 @@
         detalhe: `Total ${formatoMoeda(g.total)} · vencimento ${formatoData(g.vencimento)}`,
       });
     });
+
+    document.getElementById("btn-copiar-guia").addEventListener("click", (evento) => {
+      if (!ultimaGuiaCalculada) return;
+      const g = ultimaGuiaCalculada;
+      const texto = [
+        `DAS-MEI - competência ${MESES[g.mes - 1]}/${g.ano} (${ATIVIDADE_ROTULO[g.atividade]})`,
+        `INSS: ${formatoMoeda(g.inss)}`,
+        `${g.rotuloAdicional}: ${formatoMoeda(g.adicional)}`,
+        `Vencimento: ${formatoData(g.vencimento)}`,
+        `Total: ${formatoMoeda(g.total)}`,
+      ].join("\n");
+      copiarTexto(texto, evento.currentTarget);
+    });
+
+    document.getElementById("btn-lembrete-guia").addEventListener("click", () => {
+      if (!ultimaGuiaCalculada) return;
+      const g = ultimaGuiaCalculada;
+      baixarICS(`vencimento-das-mei-${g.ano}-${pad2(g.mes)}.ics`, {
+        data: g.vencimento,
+        titulo: `Vencimento DAS-MEI ${MESES[g.mes - 1]}/${g.ano}`,
+        descricao: `Valor calculado ${formatoMoeda(g.total)}. Emita a guia oficial no PGMEI: ${LINKS_OFICIAIS.pgmei}`,
+      });
+    });
+
+    document.getElementById("btn-imprimir-guia").addEventListener("click", () => {
+      imprimirElemento("resultado-guia");
+    });
   }
 
   // --- Aba Recalcular atraso ---
@@ -246,6 +349,33 @@
           detalhe: `${resultado.diasAtraso} dias · total com multa e juros ${formatoMoeda(resultado.total)}`,
         });
       };
+
+      document.getElementById("btn-copiar-atraso").onclick = (evento) => {
+        const g = guiaAtrasoCalculada;
+        const texto = [
+          `DAS-MEI em atraso - competência ${MESES[g.mes - 1]}/${g.ano} (${ATIVIDADE_ROTULO[g.atividade]})`,
+          `Vencimento original: ${formatoData(g.vencimento)}`,
+          `Dias em atraso: ${resultado.diasAtraso}`,
+          `Valor original: ${formatoMoeda(g.total)}`,
+          `Multa (${resultado.multaPercentual.toFixed(2)}%): ${formatoMoeda(resultado.multaValor)}`,
+          `Juros (${resultado.jurosPercentual.toFixed(2)}%): ${formatoMoeda(resultado.jurosValor)}`,
+          `Total a pagar: ${formatoMoeda(resultado.total)}`,
+        ].join("\n");
+        copiarTexto(texto, evento.currentTarget);
+      };
+
+      document.getElementById("btn-lembrete-atraso").onclick = () => {
+        const g = guiaAtrasoCalculada;
+        baixarICS(`pagamento-atraso-das-mei-${g.ano}-${pad2(g.mes)}.ics`, {
+          data: dataPagamento,
+          titulo: `Pagar DAS-MEI em atraso - ${MESES[g.mes - 1]}/${g.ano}`,
+          descricao: `Total atualizado ${formatoMoeda(resultado.total)}. Emita a guia oficial no PGMEI: ${LINKS_OFICIAIS.pgmei}`,
+        });
+      };
+
+      document.getElementById("btn-imprimir-atraso").onclick = () => {
+        imprimirElemento("resultado-atraso");
+      };
     });
   }
 
@@ -306,6 +436,21 @@
           : "O excesso foi de até 20% do limite: o desenquadramento do Simei normalmente vale a partir de janeiro do ano seguinte, sem efeito retroativo. Ainda assim, informe corretamente na DASN-SIMEI e planeje-se para sair do MEI.";
       }
 
+      const itensChecklist = [
+        `Receita bruta - Comércio/Indústria: ${formatoMoeda(resultado.receitaComercio)}`,
+        `Receita bruta - Serviços: ${formatoMoeda(resultado.receitaServicos)}`,
+        `Teve empregado contratado no ano: ${teveEmpregado ? "Sim" : "Não"}`,
+        `Receita bruta total (conferência): ${formatoMoeda(resultado.receitaTotal)}`,
+        `Situação frente ao limite: ${resultado.excedeu ? "Limite excedido (" + resultado.excessoPercentual.toFixed(2) + "%)" : "Dentro do limite"}`,
+      ];
+      const listaChecklist = document.getElementById("anual-checklist-lista");
+      listaChecklist.innerHTML = "";
+      itensChecklist.forEach((texto) => {
+        const li = document.createElement("li");
+        li.textContent = texto;
+        listaChecklist.appendChild(li);
+      });
+
       document.getElementById("resultado-anual").hidden = false;
     });
 
@@ -317,6 +462,31 @@
         titulo: `Declaração anual ${d.ano}`,
         detalhe: `Receita total ${formatoMoeda(d.receitaTotal)} · limite ${formatoMoeda(d.limite)} · ${d.excedeu ? "excedeu" : "dentro do limite"}`,
       });
+    });
+
+    document.getElementById("btn-copiar-anual").addEventListener("click", (evento) => {
+      if (!ultimaDeclaracaoCalculada) return;
+      const itens = Array.from(document.querySelectorAll("#anual-checklist-lista li")).map(
+        (li, indice) => `${indice + 1}) ${li.textContent}`
+      );
+      const d = ultimaDeclaracaoCalculada;
+      const texto = [`Checklist DASN-SIMEI - ano-calendário ${d.ano}`, ...itens].join("\n");
+      copiarTexto(texto, evento.currentTarget);
+    });
+
+    document.getElementById("btn-lembrete-anual").addEventListener("click", () => {
+      if (!ultimaDeclaracaoCalculada) return;
+      const d = ultimaDeclaracaoCalculada;
+      const prazo = new Date(Date.UTC(d.ano + 1, 4, 31)); // 31 de maio do ano seguinte
+      baixarICS(`prazo-dasn-simei-${d.ano}.ics`, {
+        data: prazo,
+        titulo: `Prazo DASN-SIMEI - ano-calendário ${d.ano}`,
+        descricao: `Entregue a Declaração Anual do MEI no site oficial: ${LINKS_OFICIAIS.dasnSimei}`,
+      });
+    });
+
+    document.getElementById("btn-imprimir-anual").addEventListener("click", () => {
+      imprimirElemento("resultado-anual");
     });
   }
 

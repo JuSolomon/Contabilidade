@@ -60,12 +60,18 @@
         <div class="linha-valor total"><span>Total da guia</span><span id="guia-total"></span></div>
         <div class="acoes">
           <button class="secundario" id="btn-salvar-guia">Salvar no histórico</button>
+          <button class="secundario" id="btn-copiar-guia">Copiar resumo</button>
+          <button class="secundario" id="btn-lembrete-guia">Lembrete de vencimento (.ics)</button>
+          <button class="secundario" id="btn-imprimir-guia">Imprimir / salvar PDF</button>
         </div>
         <div class="aviso">
-          Este valor é calculado para conferência e organização. A guia oficial (com código de barras)
-          precisa ser emitida no Programa Gerador do DAS-MEI (PGMEI), no site da Receita Federal,
-          usando o CNPJ e a mesma competência.
+          Este valor é calculado para conferência e organização. A guia oficial (com código de barras
+          e QR Code Pix) precisa ser emitida no Programa Gerador do DAS-MEI (PGMEI), no site da
+          Receita Federal, usando o CNPJ e a mesma competência.
         </div>
+        <a class="link-oficial" href="https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/Identificacao" target="_blank" rel="noopener noreferrer">
+          Abrir o PGMEI oficial e emitir a guia com código de barras ↗
+        </a>
       </div>
     </div>
   </section>
@@ -132,11 +138,17 @@
         <div class="linha-valor total"><span>Total a pagar</span><span id="atraso-total"></span></div>
         <div class="acoes">
           <button class="secundario" id="btn-salvar-atraso">Salvar no histórico</button>
+          <button class="secundario" id="btn-copiar-atraso">Copiar resumo</button>
+          <button class="secundario" id="btn-lembrete-atraso">Lembrete de pagamento (.ics)</button>
+          <button class="secundario" id="btn-imprimir-atraso">Imprimir / salvar PDF</button>
         </div>
         <div class="aviso">
           Multa de mora: 0,33% por dia de atraso, limitada a 20%. Juros: taxa SELIC acumulada nos
           meses inteiros de atraso + 1% no mês do pagamento. Confira os valores finais no PGMEI antes de pagar.
         </div>
+        <a class="link-oficial" href="https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/Identificacao" target="_blank" rel="noopener noreferrer">
+          Abrir o PGMEI oficial e emitir a guia atualizada com código de barras ↗
+        </a>
       </div>
     </div>
   </section>
@@ -189,7 +201,20 @@
         <div class="aviso" id="anual-orientacao"></div>
         <div class="aviso">
           Esta tela organiza os números para preencher a DASN-SIMEI. A entrega oficial é feita no
-          Portal do Simples Nacional (PGMEI) até 31 de maio do ano seguinte.
+          Portal do Simples Nacional até 31 de maio do ano seguinte.
+        </div>
+
+        <div class="checklist">
+          <h3>Checklist para preencher na DASN-SIMEI oficial</h3>
+          <ol id="anual-checklist-lista"></ol>
+          <div class="acoes">
+            <button class="secundario" id="btn-copiar-anual">Copiar checklist</button>
+            <button class="secundario" id="btn-lembrete-anual">Lembrete do prazo - 31/mai (.ics)</button>
+            <button class="secundario" id="btn-imprimir-anual">Imprimir / salvar PDF</button>
+          </div>
+          <a class="link-oficial" href="https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/dasnsimei.app/Identificacao" target="_blank" rel="noopener noreferrer">
+            Abrir a DASN-SIMEI oficial e entregar a declaração ↗
+          </a>
         </div>
       </div>
     </div>
@@ -211,6 +236,11 @@
   </section>
 
   <footer class="rodape">
+    <div class="rodape-links">
+      <a href="https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/Identificacao" target="_blank" rel="noopener noreferrer">PGMEI oficial (emitir guia)</a>
+      <a href="https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/dasnsimei.app/Identificacao" target="_blank" rel="noopener noreferrer">DASN-SIMEI oficial (declaração anual)</a>
+      <a href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor" target="_blank" rel="noopener noreferrer">Portal do Empreendedor</a>
+    </div>
     Ferramenta de apoio ao MEI. Não substitui o PGMEI/DASN-SIMEI oficiais da Receita Federal.
   </footer>
 </div>

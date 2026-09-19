@@ -19,6 +19,16 @@ Há também uma aba de **Histórico**, que salva os cálculos localmente no
 navegador (`localStorage`) para consulta posterior — nada é enviado para
 servidores externos.
 
+Cada resultado tem atalhos para agilizar a parte oficial:
+
+- **Copiar resumo/checklist** — copia os valores calculados para a área de
+  transferência, prontos para colar no PGMEI ou na DASN-SIMEI.
+- **Lembrete (.ics)** — baixa um arquivo de calendário com a data de
+  vencimento da guia ou o prazo da declaração anual (31/maio).
+- **Imprimir / salvar PDF** — gera uma folha de conferência imprimível.
+- **Abrir PGMEI / DASN-SIMEI oficial** — leva direto para a página oficial
+  correta no site da Receita Federal.
+
 ## Como usar
 
 Abra `index.html` diretamente no navegador, ou sirva a pasta com qualquer
@@ -33,8 +43,15 @@ python3 -m http.server 8000
 
 Esta ferramenta **calcula valores para conferência e organização**. Ela não
 emite a guia oficial com código de barras nem envia a Declaração Anual à
-Receita Federal. Para isso, use sempre o Programa Gerador do DAS-MEI (PGMEI)
-e a DASN-SIMEI no Portal do Simples Nacional, com o CNPJ do MEI.
+Receita Federal — nenhum aplicativo de terceiros consegue fazer isso, pois a
+Receita Federal não disponibiliza API pública para emissão do DAS-MEI nem
+para envio da DASN-SIMEI, e um código de barras gerado fora do sistema
+oficial não seria válido para pagamento.
+
+Por isso o app te leva direto para o lugar certo: os botões "Abrir PGMEI
+oficial" e "Abrir DASN-SIMEI oficial" apontam para as páginas oficiais da
+Receita Federal, e os botões de copiar/checklist deixam os valores prontos
+para colar lá, sem digitar de novo.
 
 ## Atualização anual dos parâmetros
 
