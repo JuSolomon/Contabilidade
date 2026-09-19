@@ -115,6 +115,18 @@ nav.abas button.ativa {
   font-size: 1.05rem;
 }
 
+.card-cnpj {
+  padding: 14px 18px;
+}
+
+.card-cnpj .campo {
+  margin-bottom: 8px;
+}
+
+.card-cnpj .aviso {
+  margin-top: 0;
+}
+
 .campo {
   margin-bottom: 14px;
 }

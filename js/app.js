@@ -13,6 +13,7 @@
   };
 
   const HISTORICO_KEY = "mei_app_historico_v1";
+  const CNPJ_KEY = "mei_app_cnpj_v1";
 
   const LINKS_OFICIAIS = {
     pgmei: "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/Identificacao",
@@ -76,6 +77,51 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  // --- CNPJ do MEI (salvo localmente, exibido junto com os resultados) ---
+  function apenasDigitos(texto) {
+    return String(texto || "").replace(/\D/g, "");
+  }
+
+  function mascararCNPJ(valor) {
+    const d = apenasDigitos(valor).slice(0, 14);
+    if (d.length > 12) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, "$1.$2.$3/$4-$5");
+    if (d.length > 8) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, "$1.$2.$3/$4");
+    if (d.length > 5) return d.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
+    if (d.length > 2) return d.replace(/(\d{2})(\d{1,3})/, "$1.$2");
+    return d;
+  }
+
+  function cnpjSalvo() {
+    try {
+      return mascararCNPJ(localStorage.getItem(CNPJ_KEY) || "");
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function configurarCNPJ() {
+    const input = document.getElementById("cnpj-mei");
+    input.value = cnpjSalvo();
+    input.addEventListener("input", () => {
+      const formatado = mascararCNPJ(input.value);
+      input.value = formatado;
+      try {
+        localStorage.setItem(CNPJ_KEY, apenasDigitos(formatado));
+      } catch (e) {
+        // armazenamento indisponível (modo privado etc.) - segue sem persistir
+      }
+    });
+  }
+
+  function exibirCNPJEm(linhaId, valorId) {
+    const cnpj = cnpjSalvo();
+    const linha = document.getElementById(linhaId);
+    linha.hidden = cnpj.length === 0;
+    if (cnpj.length > 0) {
+      document.getElementById(valorId).textContent = cnpj;
+    }
   }
 
   function imprimirElemento(elementId) {
@@ -218,6 +264,7 @@
       document.getElementById("guia-adicional").textContent = formatoMoeda(guia.adicional);
       document.getElementById("guia-vencimento").textContent = formatoData(guia.vencimento);
       document.getElementById("guia-total").textContent = formatoMoeda(guia.total);
+      exibirCNPJEm("guia-cnpj-linha", "guia-cnpj-valor");
       document.getElementById("resultado-guia").hidden = false;
     });
 
@@ -234,7 +281,9 @@
     document.getElementById("btn-copiar-guia").addEventListener("click", (evento) => {
       if (!ultimaGuiaCalculada) return;
       const g = ultimaGuiaCalculada;
+      const cnpj = cnpjSalvo();
       const texto = [
+        ...(cnpj ? [`CNPJ: ${cnpj}`] : []),
         `DAS-MEI - competência ${MESES[g.mes - 1]}/${g.ano} (${ATIVIDADE_ROTULO[g.atividade]})`,
         `INSS: ${formatoMoeda(g.inss)}`,
         `${g.rotuloAdicional}: ${formatoMoeda(g.adicional)}`,
@@ -339,6 +388,7 @@
       document.getElementById("atraso-juros-rotulo").textContent = `Juros de mora (${resultado.jurosPercentual.toFixed(2)}%)`;
       document.getElementById("atraso-juros").textContent = formatoMoeda(resultado.jurosValor);
       document.getElementById("atraso-total").textContent = formatoMoeda(resultado.total);
+      exibirCNPJEm("atraso-cnpj-linha", "atraso-cnpj-valor");
       document.getElementById("resultado-atraso").hidden = false;
 
       document.getElementById("btn-salvar-atraso").onclick = () => {
@@ -352,7 +402,9 @@
 
       document.getElementById("btn-copiar-atraso").onclick = (evento) => {
         const g = guiaAtrasoCalculada;
+        const cnpj = cnpjSalvo();
         const texto = [
+          ...(cnpj ? [`CNPJ: ${cnpj}`] : []),
           `DAS-MEI em atraso - competência ${MESES[g.mes - 1]}/${g.ano} (${ATIVIDADE_ROTULO[g.atividade]})`,
           `Vencimento original: ${formatoData(g.vencimento)}`,
           `Dias em atraso: ${resultado.diasAtraso}`,
@@ -436,7 +488,9 @@
           : "O excesso foi de até 20% do limite: o desenquadramento do Simei normalmente vale a partir de janeiro do ano seguinte, sem efeito retroativo. Ainda assim, informe corretamente na DASN-SIMEI e planeje-se para sair do MEI.";
       }
 
+      const cnpj = cnpjSalvo();
       const itensChecklist = [
+        ...(cnpj ? [`CNPJ: ${cnpj}`] : []),
         `Receita bruta - Comércio/Indústria: ${formatoMoeda(resultado.receitaComercio)}`,
         `Receita bruta - Serviços: ${formatoMoeda(resultado.receitaServicos)}`,
         `Teve empregado contratado no ano: ${teveEmpregado ? "Sim" : "Não"}`,
@@ -451,6 +505,7 @@
         listaChecklist.appendChild(li);
       });
 
+      exibirCNPJEm("anual-cnpj-linha", "anual-cnpj-valor");
       document.getElementById("resultado-anual").hidden = false;
     });
 
@@ -501,6 +556,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    configurarCNPJ();
     configurarAbas();
     configurarAbaGuia();
     configurarAbaAtraso();

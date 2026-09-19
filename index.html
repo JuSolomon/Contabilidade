@@ -13,6 +13,17 @@
     <p>Guia mensal (DAS-MEI), recálculo por atraso e Declaração Anual (DASN-SIMEI)</p>
   </header>
 
+  <div class="card card-cnpj">
+    <div class="campo">
+      <label for="cnpj-mei">CNPJ do MEI</label>
+      <input type="text" id="cnpj-mei" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00" />
+    </div>
+    <div class="aviso">
+      Fica salvo só neste navegador e aparece junto com os resultados, para você conferir e colar
+      rapidamente no PGMEI ou na DASN-SIMEI (que pedem o CNPJ na tela deles).
+    </div>
+  </div>
+
   <nav class="abas">
     <button data-aba="guia" class="ativa">Guia mensal</button>
     <button data-aba="atraso">Recalcular atraso</button>
@@ -54,6 +65,7 @@
       </div>
 
       <div class="resultado" id="resultado-guia" hidden>
+        <div class="linha-valor" id="guia-cnpj-linha" hidden><span>CNPJ</span><span id="guia-cnpj-valor"></span></div>
         <div class="linha-valor"><span>INSS (5% do salário mínimo)</span><span id="guia-inss"></span></div>
         <div class="linha-valor"><span id="guia-adicional-rotulo">Adicional</span><span id="guia-adicional"></span></div>
         <div class="linha-valor"><span>Vencimento</span><span id="guia-vencimento"></span></div>
@@ -130,6 +142,7 @@
       </div>
 
       <div class="resultado" id="resultado-atraso" hidden>
+        <div class="linha-valor" id="atraso-cnpj-linha" hidden><span>CNPJ</span><span id="atraso-cnpj-valor"></span></div>
         <div class="linha-valor"><span>Vencimento original</span><span id="atraso-vencimento"></span></div>
         <div class="linha-valor"><span>Dias em atraso</span><span id="atraso-dias"></span></div>
         <div class="linha-valor"><span>Valor original da guia</span><span id="atraso-principal"></span></div>
@@ -191,6 +204,7 @@
       </div>
 
       <div class="resultado" id="resultado-anual" hidden>
+        <div class="linha-valor" id="anual-cnpj-linha" hidden><span>CNPJ</span><span id="anual-cnpj-valor"></span></div>
         <div class="linha-valor"><span>Receita bruta total</span><span id="anual-total"></span></div>
         <div class="linha-valor"><span>Limite anual aplicável</span><span id="anual-limite"></span></div>
         <div class="linha-valor"><span>Situação</span><span id="anual-situacao"></span></div>
