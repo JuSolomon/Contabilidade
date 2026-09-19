@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MEI Calculadora</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+  <header class="topo">
+    <h1>MEI Calculadora</h1>
+    <p>Guia mensal (DAS-MEI), recálculo por atraso e Declaração Anual (DASN-SIMEI)</p>
+  </header>
+
+  <nav class="abas">
+    <button data-aba="guia" class="ativa">Guia mensal</button>
+    <button data-aba="atraso">Recalcular atraso</button>
+    <button data-aba="anual">Declaração anual</button>
+    <button data-aba="historico">Histórico</button>
+  </nav>
+
+  <!-- ABA 1: GUIA MENSAL -->
+  <section id="painel-guia" class="painel ativa">
+    <div class="card">
+      <h2>Gerar guia mensal (DAS-MEI)</h2>
+      <div class="linha">
+        <div class="campo">
+          <label for="guia-mes">Competência - mês</label>
+          <select id="guia-mes"></select>
+        </div>
+        <div class="campo">
+          <label for="guia-ano">Competência - ano</label>
+          <input type="number" id="guia-ano" min="2015" max="2100" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Atividade</label>
+        <div class="radios">
+          <label><input type="radio" name="guia-atividade" value="comercio_industria" checked /> Comércio e Indústria (INSS + ICMS)</label>
+          <label><input type="radio" name="guia-atividade" value="servicos" /> Serviços (INSS + ISS)</label>
+          <label><input type="radio" name="guia-atividade" value="comercio_servicos" /> Comércio e Serviços (INSS + ICMS + ISS)</label>
+        </div>
+      </div>
+
+      <div class="campo" id="guia-sm-wrapper" style="display:none">
+        <label for="guia-sm-manual">Salário mínimo do ano (não cadastrado, informe manualmente)</label>
+        <input type="number" id="guia-sm-manual" step="0.01" min="0" placeholder="Ex.: 1518.00" />
+      </div>
+
+      <div class="acoes">
+        <button class="primario" id="btn-calcular-guia">Calcular guia</button>
+      </div>
+
+      <div class="resultado" id="resultado-guia" hidden>
+        <div class="linha-valor"><span>INSS (5% do salário mínimo)</span><span id="guia-inss"></span></div>
+        <div class="linha-valor"><span id="guia-adicional-rotulo">Adicional</span><span id="guia-adicional"></span></div>
+        <div class="linha-valor"><span>Vencimento</span><span id="guia-vencimento"></span></div>
+        <div class="linha-valor total"><span>Total da guia</span><span id="guia-total"></span></div>
+        <div class="acoes">
+          <button class="secundario" id="btn-salvar-guia">Salvar no histórico</button>
+        </div>
+        <div class="aviso">
+          Este valor é calculado para conferência e organização. A guia oficial (com código de barras)
+          precisa ser emitida no Programa Gerador do DAS-MEI (PGMEI), no site da Receita Federal,
+          usando o CNPJ e a mesma competência.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 2: RECALCULAR ATRASO -->
+  <section id="painel-atraso" class="painel">
+    <div class="card">
+      <h2>Recalcular guia em atraso</h2>
+      <div class="linha">
+        <div class="campo">
+          <label for="atraso-mes">Competência - mês</label>
+          <select id="atraso-mes"></select>
+        </div>
+        <div class="campo">
+          <label for="atraso-ano">Competência - ano</label>
+          <input type="number" id="atraso-ano" min="2015" max="2100" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Atividade</label>
+        <div class="radios">
+          <label><input type="radio" name="atraso-atividade" value="comercio_industria" checked /> Comércio e Indústria</label>
+          <label><input type="radio" name="atraso-atividade" value="servicos" /> Serviços</label>
+          <label><input type="radio" name="atraso-atividade" value="comercio_servicos" /> Comércio e Serviços</label>
+        </div>
+      </div>
+
+      <div class="campo" id="atraso-sm-wrapper" style="display:none">
+        <label for="atraso-sm-manual">Salário mínimo do ano (não cadastrado, informe manualmente)</label>
+        <input type="number" id="atraso-sm-manual" step="0.01" min="0" placeholder="Ex.: 1518.00" />
+      </div>
+
+      <div class="campo">
+        <label for="atraso-data-pagamento">Data em que vai pagar (ou pagou)</label>
+        <input type="date" id="atraso-data-pagamento" />
+      </div>
+
+      <div class="acoes">
+        <button class="primario" id="btn-ver-vencimento">Ver vencimento e meses de juros</button>
+      </div>
+
+      <div id="atraso-selic-wrapper" hidden>
+        <div class="aviso" style="margin-top:14px">
+          Informe a taxa SELIC de cada mês inteiro decorrido entre o vencimento e o pagamento
+          (consulte a taxa SELIC mensal acumulada no site do Banco Central do Brasil). O mês do
+          próprio pagamento já soma automaticamente 1% de juros, conforme a regra do Simples Nacional.
+        </div>
+        <table class="selic" id="tabela-selic">
+          <thead><tr><th>Mês</th><th>Taxa SELIC (%)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="acoes">
+          <button class="primario" id="btn-calcular-atraso">Calcular valor com multa e juros</button>
+        </div>
+      </div>
+
+      <div class="resultado" id="resultado-atraso" hidden>
+        <div class="linha-valor"><span>Vencimento original</span><span id="atraso-vencimento"></span></div>
+        <div class="linha-valor"><span>Dias em atraso</span><span id="atraso-dias"></span></div>
+        <div class="linha-valor"><span>Valor original da guia</span><span id="atraso-principal"></span></div>
+        <div class="linha-valor"><span id="atraso-multa-rotulo">Multa de mora</span><span id="atraso-multa"></span></div>
+        <div class="linha-valor"><span id="atraso-juros-rotulo">Juros de mora</span><span id="atraso-juros"></span></div>
+        <div class="linha-valor total"><span>Total a pagar</span><span id="atraso-total"></span></div>
+        <div class="acoes">
+          <button class="secundario" id="btn-salvar-atraso">Salvar no histórico</button>
+        </div>
+        <div class="aviso">
+          Multa de mora: 0,33% por dia de atraso, limitada a 20%. Juros: taxa SELIC acumulada nos
+          meses inteiros de atraso + 1% no mês do pagamento. Confira os valores finais no PGMEI antes de pagar.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 3: DECLARAÇÃO ANUAL -->
+  <section id="painel-anual" class="painel">
+    <div class="card">
+      <h2>Declaração Anual do MEI (DASN-SIMEI)</h2>
+      <div class="campo">
+        <label for="anual-ano">Ano-calendário</label>
+        <input type="number" id="anual-ano" min="2015" max="2100" />
+      </div>
+
+      <div class="campo">
+        <label class="checkbox"><input type="checkbox" id="anual-abriu-no-ano" /> Abri o CNPJ MEI durante este ano</label>
+      </div>
+
+      <div class="campo" id="anual-mes-abertura-wrapper" style="display:none">
+        <label for="anual-mes-abertura">Mês de abertura do CNPJ</label>
+        <select id="anual-mes-abertura"></select>
+      </div>
+
+      <div class="linha">
+        <div class="campo">
+          <label for="anual-receita-comercio">Receita bruta com revenda de mercadorias (comércio/indústria) no ano</label>
+          <input type="number" id="anual-receita-comercio" step="0.01" min="0" placeholder="0,00" />
+        </div>
+        <div class="campo">
+          <label for="anual-receita-servicos">Receita bruta com prestação de serviços no ano</label>
+          <input type="number" id="anual-receita-servicos" step="0.01" min="0" placeholder="0,00" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label class="checkbox"><input type="checkbox" id="anual-teve-empregado" /> Tive um empregado contratado durante o ano</label>
+      </div>
+
+      <div class="acoes">
+        <button class="primario" id="btn-calcular-anual">Calcular</button>
+      </div>
+
+      <div class="resultado" id="resultado-anual" hidden>
+        <div class="linha-valor"><span>Receita bruta total</span><span id="anual-total"></span></div>
+        <div class="linha-valor"><span>Limite anual aplicável</span><span id="anual-limite"></span></div>
+        <div class="linha-valor"><span>Situação</span><span id="anual-situacao"></span></div>
+        <div id="anual-excesso-linhas"></div>
+        <div class="acoes">
+          <button class="secundario" id="btn-salvar-anual">Salvar no histórico</button>
+        </div>
+        <div class="aviso" id="anual-orientacao"></div>
+        <div class="aviso">
+          Esta tela organiza os números para preencher a DASN-SIMEI. A entrega oficial é feita no
+          Portal do Simples Nacional (PGMEI) até 31 de maio do ano seguinte.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 4: HISTÓRICO -->
+  <section id="painel-historico" class="painel">
+    <div class="card">
+      <h2>Histórico salvo neste dispositivo</h2>
+      <div id="lista-historico"></div>
+      <div class="acoes">
+        <button class="secundario" id="btn-limpar-historico">Limpar histórico</button>
+      </div>
+      <div class="aviso">
+        O histórico é salvo apenas no armazenamento local deste navegador/dispositivo. Ele não é
+        enviado para nenhum servidor.
+      </div>
+    </div>
+  </section>
+
+  <footer class="rodape">
+    Ferramenta de apoio ao MEI. Não substitui o PGMEI/DASN-SIMEI oficiais da Receita Federal.
+  </footer>
+</div>
+
+<script src="js/calc.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
