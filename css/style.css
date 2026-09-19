@@ -326,3 +326,78 @@ footer.rodape {
   color: var(--cinza-400);
   text-align: center;
 }
+
+.rodape-links {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+}
+
+.rodape-links a {
+  color: var(--azul);
+  text-decoration: none;
+}
+
+.rodape-links a:hover {
+  text-decoration: underline;
+}
+
+.link-oficial {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--azul);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.link-oficial:hover {
+  text-decoration: underline;
+}
+
+.checklist {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+}
+
+.checklist h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.checklist ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
+.checklist ol li {
+  margin-bottom: 6px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .imprimir-isto,
+  .imprimir-isto * {
+    visibility: visible;
+  }
+
+  .imprimir-isto {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .imprimir-isto .acoes,
+  .imprimir-isto .link-oficial {
+    display: none !important;
+  }
+}
